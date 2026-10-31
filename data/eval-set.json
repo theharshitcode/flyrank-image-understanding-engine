@@ -1,0 +1,15 @@
+{
+  "description": "Starter evaluation labels. Verify each label against the actual imported image corpus before reporting precision.",
+  "examples": [
+    {"post_title":"Red foxes in woodland habitats","expected_category":"animal","expected_subject":"red fox"},
+    {"post_title":"How gray wolves hunt in packs","expected_category":"animal","expected_subject":"gray wolf"},
+    {"post_title":"Domestic dogs and their behavior","expected_category":"animal","expected_subject":"domestic dog"},
+    {"post_title":"Brown bears in the wild","expected_category":"animal","expected_subject":"brown bear"},
+    {"post_title":"Deer living in forest clearings","expected_category":"animal","expected_subject":"deer"},
+    {"post_title":"Fresh strawberries in summer","expected_category":"food","expected_subject":"strawberry"},
+    {"post_title":"Classic red sports car design","expected_category":"vehicle","expected_subject":"sports car"},
+    {"post_title":"Mountain landscape at sunrise","expected_category":"nature","expected_subject":"mountain"},
+    {"post_title":"Red fox habitat and adaptation","expected_category":"animal","expected_subject":"red fox"},
+    {"post_title":"Wolves and wild canid conservation","expected_category":"animal","expected_subject":"gray wolf"}
+  ]
+}

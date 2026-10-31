@@ -1,0 +1,79 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: flyrank
+      POSTGRES_PASSWORD: flyrank
+      POSTGRES_DB: flyrank
+    ports:
+      - "5435:5432"
+    volumes:
+      - flyrank_pgdata:/var/lib/postgresql/data
+      - ./migrations/001_init.sql:/docker-entrypoint-initdb.d/001_init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flyrank -d flyrank"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  ollama-model:
+    image: ollama/ollama:latest
+    entrypoint: ["/bin/sh", "-c", "ollama pull all-minilm"]
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: "no"
+  api:
+    build: .
+    command: npm start
+    environment:
+      DATABASE_URL: postgres://flyrank:flyrank@db:5432/flyrank
+      PORT: 3000
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      GROQ_BASE_URL: https://api.groq.com/openai/v1
+      GROQ_VISION_MODEL: ${GROQ_VISION_MODEL:-qwen/qwen3.8-27b}
+      GROQ_TEXT_MODEL: ${GROQ_TEXT_MODEL:-openai/gpt-oss-20b}
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_EMBEDDING_MODEL: all-minilm
+      IMAGE_STORAGE_DIR: /app/data/images
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./data/images:/app/data/images
+    depends_on:
+      db:
+        condition: service_healthy
+      ollama-model:
+        condition: service_completed_successfully
+  worker:
+    build: .
+    command: npm run worker
+    environment:
+      DATABASE_URL: postgres://flyrank:flyrank@db:5432/flyrank
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      GROQ_BASE_URL: https://api.groq.com/openai/v1
+      GROQ_VISION_MODEL: ${GROQ_VISION_MODEL:-qwen/qwen3.8-27b}
+      GROQ_TEXT_MODEL: ${GROQ_TEXT_MODEL:-openai/gpt-oss-20b}
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_EMBEDDING_MODEL: all-minilm
+      IMAGE_STORAGE_DIR: /app/data/images
+    volumes:
+      - ./data/images:/app/data/images
+    depends_on:
+      db:
+        condition: service_healthy
+      ollama-model:
+        condition: service_completed_successfully
+volumes:
+  flyrank_pgdata:
+  ollama_data:

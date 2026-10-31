@@ -1,0 +1,18 @@
+name: flyrank-capstone-imagerelevance
+run: docker compose up --build
+seed: docker compose exec api npm run seed
+test: docker compose exec api npm test
+base_url: http://localhost:3000
+health: GET /health
+endpoints:
+  - POST /api/images
+  - GET /api/images
+  - GET /api/images/:id
+  - POST /api/images/:id/reprocess
+  - POST /api/posts
+  - GET /api/posts
+  - POST /api/posts/:id/match
+  - GET /api/posts/:id/images
+  - POST /api/reviews/:suggestionId
+  - GET /api/admin/jobs
+  - GET /api/admin/costs

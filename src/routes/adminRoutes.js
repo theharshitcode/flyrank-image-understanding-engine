@@ -1,0 +1,4 @@
+const router=require('express').Router();const asyncHandler=require('../lib/asyncHandler');const pool=require('../db/pool');
+router.get('/jobs',asyncHandler(async(_req,res)=>{const {rows}=await pool.query(`SELECT status,COUNT(*)::int AS count FROM jobs GROUP BY status ORDER BY status`);res.json({jobs:rows});}));
+router.get('/costs',asyncHandler(async(_req,res)=>{const {rows}=await pool.query(`SELECT provider,model,operation,status,COUNT(*)::int AS calls,SUM(input_units)::bigint AS input_units,SUM(output_units)::bigint AS output_units,SUM(estimated_cost_usd)::numeric(12,8) AS estimated_cost_usd FROM ai_costs GROUP BY provider,model,operation,status ORDER BY calls DESC`);const {rows:total}=await pool.query(`SELECT COUNT(*)::int AS calls,SUM(estimated_cost_usd)::numeric(12,8) AS estimated_cost_usd FROM ai_costs`);res.json({total:total[0],breakdown:rows});}));
+module.exports=router;
